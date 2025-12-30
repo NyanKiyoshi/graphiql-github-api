@@ -1,19 +1,18 @@
-FROM node:24-slim AS PNPM
+FROM node:24-slim AS pnpm
 RUN npm install -g 'pnpm@10' && pnpm -v
 
-FROM PNPM AS DEPS
+FROM pnpm AS deps
 WORKDIR /app
 ADD ./package.json ./pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-FROM PNPM AS VITE_BUILD
+FROM pnpm AS vitebuild
 WORKDIR /app
 ADD ./package.json ./
 ADD ./index.html ./
-ADD ./public ./public/
 ADD ./src ./src/
 ADD ./vite.config.mjs ./
-COPY --from=DEPS /app/node_modules/ ./node_modules/
+COPY --from=deps /app/node_modules/ ./node_modules/
 RUN pnpm run build
 
 EXPOSE 4174
