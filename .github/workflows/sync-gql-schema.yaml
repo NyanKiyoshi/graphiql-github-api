@@ -92,8 +92,9 @@ jobs:
 
       - name: Copy Schema
         env:
-          RUNNER_TEMP: ${{ runner.temp }}/schema/
+          RUNNER_TEMP: ${{ runner.temp }}
         run: |
+          find "$RUNNER_TEMP"
           cp "$RUNNER_TEMP"/schema/src/schema.graphql ./src/schema.graphql
 
       # NOTE: we do not update existing PRs in case we may end up editing a malicious one
