@@ -1,0 +1,28 @@
+name: Check Lockfile
+on:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  check-lockfile:
+    runs-on: ubuntu-24.04
+    name: Check Lockfile
+
+    permissions:
+      contents: read
+
+    outputs:
+      files-changed: ${{ steps.detect-changes.outputs.files-changed }}
+      schema-artifact-id: ${{ steps.upload-schema.outputs.artifact-id }}
+
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Check Lockfile
+        run: |
+          pnpm install --frozen-lockfile

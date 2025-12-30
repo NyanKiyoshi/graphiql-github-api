@@ -1,0 +1,122 @@
+name: Synchronize GraphQL Schema
+on:
+  # Every day at 11:15 AM (UTC)
+  # NOTE: we do not use 0:00 UTC in order to avoid traffic spikes
+  #       on GH's side caused by other cronjobs.
+  schedule:
+    - cron: "11 15 * * *"
+
+permissions: {}
+
+jobs:
+  download-schema:
+    runs-on: ubuntu-24.04
+    name: Download Schema
+
+    permissions:
+      contents: read
+
+    outputs:
+      files-changed: ${{ steps.detect-changes.outputs.files-changed }}
+      schema-artifact-id: ${{ steps.upload-schema.outputs.artifact-id }}
+
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: |
+            bin/
+
+      - name: Download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node ./bin/download-schema.js
+
+      - name: Detect Changes
+        id: detect-changes
+        run: |
+          files_changed=$(git status --porcelain | wc -l)
+
+          if [[ "$files_changed" -gt 1 ]]; then
+            echo "Detected $files_changed files changed, but only expected 1" >&2
+            exit 1
+          else
+            # Will be 0 when not changed, and 1 when changed
+            echo "files-changed=$files_changed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: ${{ steps.detect-changes.outputs.files-changed > 0 }}
+        name: Upload Schema
+        id: upload-schema
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: "New Schema"
+          path: ./src/schema.graphql
+
+  open-pr:
+    runs-on: ubuntu-24.04
+    name: Open Pull Request
+    needs: [download-schema]
+
+    # Only runs if there is a file to commit
+    if: ${{ needs.download-schema.outputs.files-changed > 0 }}
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          artifact-ids: ${{ needs.download-schema.outputs.schema-artifact-id }}
+          path: ${{ runner.temp }}/schema/
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Copy Schema
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}/schema/
+        run: |
+          cp "$RUNNER_TEMP"/src/schema.graphql ./src/schema.graphql
+
+      # NOTE: we do not update existing PRs in case we may end up editing a malicious one
+      - name: Close Existing PR (If Any)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+
+          branch=bump-schema
+
+          if git ls-remote --exit-code --heads origin "$branch"; then
+            echo "OK: branch doesn't exist yet" >&2
+            exit 0
+          fi
+
+          echo "Deleting existing PR..." >&2
+          gh pr close \
+            --comment "This pull request is outdated, closing it in favor of a newer one." \
+            --delete-branch \
+            "$branch"
+
+      - name: Push Branch
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+
+          git add src/schema.graphql
+          git commit -m "Bump schema to latest
+
+          Fetched around $(date)"
+          git checkout -b bump-schema
+          git push
+
+      - name: Open PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create
