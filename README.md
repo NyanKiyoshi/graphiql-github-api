@@ -1,8 +1,14 @@
+# GraphiQL for the GitHub API
+
+<div align="center">
+  <img width="700" alt="Cover image" src="https://github.com/user-attachments/assets/de6f37ba-c5f8-4a73-999b-1568f4658681" />
+</div>
+
 ## Usage
 
-> [!NOTE]
+> [!WARNING]
 > To use the explorer, you will need to create a token. Go here:
-> https://github.com/settings/tokens (fine-grained or classic token)
+> https://github.com/settings/personal-access-tokens
 >
 > Then pass the token like so in the "Headers" tab:
 >
@@ -11,17 +17,17 @@
 >   "Authorization": "Bearer <MY_TOKEN>"
 > }
 > ```
-
-> [!WARNING]
-> Initially the schema fetching will fail due to being rate-limited,
-> to fix this you need to:
 >
-> 1. Add the `Authorization` header (+ your token) in the GraphiQL
-> 2. Click the refresh button (bottom-left corner)
-> 3. Wait a few seconds (10+ seconds)
-> 4. You should be able to have auto-completion & docs
+> Like so: [screenshot](https://github.com/user-attachments/assets/a6452304-d67c-4a36-bb31-9d6c4dddcc5a)
+>
+> Note: NEVER share the token with anyone, and only assign permissions
+> that you need (in most cases, granting only access to Public repositories
+> is enough for example.)
 
-If you just want to run it (no dev):
+### Local Usage
+
+If you just want to run it (without modifying the source code),
+then run:
 
 ```
 $ make build start
@@ -30,7 +36,7 @@ $ make build start
 If you want to edit the source code, then run:
 
 ```
-$ make watch
+$ make build watch
 ```
 
 ## Why
