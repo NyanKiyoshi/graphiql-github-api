@@ -1,0 +1,32 @@
+{
+  "name": "@mikisec/graphiql-github-api",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": ">=10.26.0",
+      "onFail": "warn"
+    }
+  },
+  "dependencies": {
+    "@octokit/graphql-schema": "^15.26.1",
+    "graphiql": "^5.2.2",
+    "graphql": "^16.11.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.4.1",
+    "pnpm": "^10.26.2",
+    "vite": "^7.0.0",
+    "vite-plugin-csp-guard": "^3.0.0",
+    "vite-plugin-monaco-editor": "^1.1.0"
+  },
+  "scripts": {
+    "build": "vite build",
+    "start": "vite --host \"${LISTEN_ADDR-127.0.0.1}\" --port 4174",
+    "watch": "vite build --watch & pnpm start"
+  }
+}
