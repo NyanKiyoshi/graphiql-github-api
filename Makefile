@@ -24,3 +24,10 @@ build:
 # It will not rebuild.
 start:
 	docker run --rm -ti $(RUN_ARGS) $(NAME)
+
+release:
+	docker run --rm -ti \
+		$(RUN_ARGS) \
+		-v ./dist/:/app/dist \
+		$(NAME) \
+		pnpm run build
