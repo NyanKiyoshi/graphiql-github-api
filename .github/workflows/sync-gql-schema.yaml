@@ -104,7 +104,7 @@ jobs:
 
           branch=bump-schema
 
-          if git ls-remote --exit-code --heads origin "$branch"; then
+          if ! git ls-remote --exit-code --heads origin "$branch"; then
             echo "OK: branch doesn't exist yet" >&2
             exit 0
           fi
