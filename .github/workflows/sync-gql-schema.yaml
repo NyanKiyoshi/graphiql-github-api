@@ -30,10 +30,21 @@ jobs:
           sparse-checkout: |
             bin/
 
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        name: Install pnpm
+        with:
+          version: 10
+
+      - name: Install Dependencies
+        run: |
+          cd ./bin
+          pnpm install --frozen-lockfile
+
       - name: Download
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          mkdir src/ # will write schema into it
           node ./bin/download-schema.js
 
       - name: Detect Changes
@@ -66,7 +77,7 @@ jobs:
     if: ${{ needs.download-schema.outputs.files-changed > 0 }}
 
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
 
     steps:
@@ -80,9 +91,9 @@ jobs:
 
       - name: Copy Schema
         env:
-          RUNNER_TEMP: ${{ runner.temp }}/schema/
+          RUNNER_TEMP: ${{ runner.temp }}
         run: |
-          cp "$RUNNER_TEMP"/src/schema.graphql ./src/schema.graphql
+          cp "$RUNNER_TEMP"/schema/schema.graphql ./src/schema.graphql
 
       # NOTE: we do not update existing PRs in case we may end up editing a malicious one
       - name: Close Existing PR (If Any)
@@ -92,7 +103,7 @@ jobs:
 
           branch=bump-schema
 
-          if git ls-remote --exit-code --heads origin "$branch"; then
+          if ! git ls-remote --exit-code --heads origin "$branch"; then
             echo "OK: branch doesn't exist yet" >&2
             exit 0
           fi
@@ -105,18 +116,20 @@ jobs:
 
       - name: Push Branch
         run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add src/schema.graphql
           git commit -m "Bump schema to latest
 
           Fetched around $(date)"
           git checkout -b bump-schema
-          git push
+          git push --set-upstream origin bump-schema
 
       - name: Open PR
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr create
+          gh pr create \
+            --title "Synchronize GitHub schema ($(date '+%Y-%m-%d'))" \
+            --body "<!-- PR by sync-gql-schema.yaml -->"
