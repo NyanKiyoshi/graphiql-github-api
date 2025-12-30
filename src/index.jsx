@@ -37,7 +37,19 @@ root.render(
   <GraphiQL
     fetcher={fetcher}
     schema={buildSchema(schemaString)}
-    defaultQuery={`{
+    defaultQuery={`
+# !!!! WARNING !!!
+# For it to work, you need to setup a GitHub Token and add it in the headers:
+# {
+#    "Authorization": "Bearer <TOKEN>"
+# }
+# 
+# But replace <TOKEN> with your token (https://github.com/settings/tokens).
+#
+# Remember: NEVER share the token with anyone, and grant as little permissions
+#           as possible.
+#
+{
   organization(login: "ghost") {
     repository(name: "my-ghost-repo") {
       pullRequests(first: 10) {

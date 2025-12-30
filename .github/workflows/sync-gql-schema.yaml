@@ -1,4 +1,4 @@
-name: Synchronize GraphQL Schema
+name: Publish to GitHub Pages
 on:
   # Every day at 11:15 AM (UTC)
   # NOTE: we do not use 0:00 UTC in order to avoid traffic spikes
@@ -78,7 +78,7 @@ jobs:
     if: ${{ needs.download-schema.outputs.files-changed > 0 }}
 
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
 
     steps:
