@@ -45,6 +45,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          mkdir src/ # will write schema into it
           node ./bin/download-schema.js
 
       - name: Detect Changes
