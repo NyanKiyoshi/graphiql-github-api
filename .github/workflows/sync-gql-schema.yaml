@@ -132,4 +132,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh pr create \
-            --title "Synchronize GitHub schema ($(date '+%Y-%m-%d'))"
+            --title "Synchronize GitHub schema ($(date '+%Y-%m-%d'))" \
+            --body "<!-- PR by sync-gql-schema.yaml -->"
