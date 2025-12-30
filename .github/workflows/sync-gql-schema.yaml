@@ -31,6 +31,11 @@ jobs:
           sparse-checkout: |
             bin/
 
+      - name: Install Dependencies
+        run: |
+          cd ./bin
+          pnpm install --frozen-lockfile
+
       - name: Download
         env:
           GH_TOKEN: ${{ github.token }}
