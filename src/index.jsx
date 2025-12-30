@@ -6,6 +6,22 @@ import "graphiql/style.css";
 import schemaString from "./schema.graphql?raw";
 
 async function fetcher(graphQLParams, options) {
+  // Warns if 'Authorization' header isn't set in order to reduce
+  // the risk of user confusion as the GraphQL API doesn't accept
+  // anonymous requests and may not always provide a helpful response
+  // for the user.
+  const isAuthorizationHeaderSet = Object.keys(options.headers || {}).some(
+    (key) => key.toLowerCase() === "authorization",
+  );
+
+  if (!isAuthorizationHeaderSet) {
+    return {
+      error:
+        "Authorization header is missing, learn how in the documentation: " +
+        "https://github.com/NyanKiyoshi/graphiql-github-api/blob/main/README.md",
+    };
+  }
+
   const response = await fetch("https://api.github.com/graphql", {
     method: "POST",
     headers: {
