@@ -2,7 +2,6 @@ name: Publish to GH Pages
 on:
   push:
     branches: [main]
-  pull_request:
 
 permissions: {}
 
