@@ -1,4 +1,4 @@
-name: Publish to GitHub Pages
+name: Synchronize GraphQL Schema
 on:
   # Every day at 11:15 AM (UTC)
   # NOTE: we do not use 0:00 UTC in order to avoid traffic spikes
@@ -131,4 +131,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr create
+          gh pr create \
+            --title "Synchronize GitHub schema ($(date '+%Y-%m-%d'))"
