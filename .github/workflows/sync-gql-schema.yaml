@@ -125,7 +125,7 @@ jobs:
 
           Fetched around $(date)"
           git checkout -b bump-schema
-          git push
+          git push --set-upstream origin bump-schema
 
       - name: Open PR
         env:
