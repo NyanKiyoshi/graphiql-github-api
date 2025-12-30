@@ -5,6 +5,7 @@ on:
   #       on GH's side caused by other cronjobs.
   schedule:
     - cron: "11 15 * * *"
+  pull_request:
 
 permissions: {}
 
