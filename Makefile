@@ -30,3 +30,11 @@ release:
 		-v ./dist/:/app/dist \
 		$(NAME) \
 		pnpm run build
+
+shell:
+	docker run --rm \
+		-ti \
+		--pull=never \
+		--name $(NAME)-shell \
+		$(NAME) \
+		bash -i
