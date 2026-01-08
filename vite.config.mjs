@@ -7,37 +7,6 @@ import fs from "fs";
 import path from "path";
 
 const monacoEditorPlugin = $monacoEditorPlugin.default ?? $monacoEditorPlugin;
-
-/**
- * @param {String} data The data to hash (string)
- */
-export const generateCSPHashForFile = (file) => {
-  const data = fs.readFileSync(file, "utf8");
-  const hash = createHash("sha512").update(data).digest("base64");
-  return `'sha512-${hash}'`;
-};
-
-/**
- * @param {String} dirPath The path to the directory containing the files to hash
- * @returns {Object} A mapping of file paths to their corresponding hashes
- */
-const generateCSPHashesForDirectory = (dirPath) => {
-  const hashes = [];
-
-  fs.readdirSync(dirPath).forEach((file) => {
-    const filePath = path.join(dirPath, file);
-
-    // Only hash files (skip directories)
-    if (fs.lstatSync(filePath).isFile()) {
-      console.debug("hasibng", filePath);
-      const hash = generateCSPHashForFile(filePath);
-      hashes.push(hash);
-    }
-  });
-
-  return hashes;
-};
-
 const monacoWorkerJSFilePath = "monaco-graphql/esm/graphql.worker.js";
 
 export default defineConfig({
@@ -72,10 +41,6 @@ export default defineConfig({
           //       - https://github.com/tsotimus/vite-plugin-csp-guard/issues/335
           //       - https://github.com/vdesjs/vite-plugin-monaco-editor/issues/51
           "'self'",
-          // TODO: this should work but it doesn't (c.f., above TODO)
-          ...generateCSPHashesForDirectory(
-            path.join(import.meta.dirname, "dist/monacoeditorwork/"),
-          ),
         ],
       },
     }),
