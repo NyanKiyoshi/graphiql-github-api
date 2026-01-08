@@ -65913,4 +65913,4 @@ scalar X509Certificate
 
 scalar _Any
 
-union _Entity = Issue
+union _Entity = Issue | Repository
