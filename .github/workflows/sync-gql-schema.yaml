@@ -5,6 +5,9 @@ on:
   #       on GH's side caused by other cronjobs.
   schedule:
     - cron: "11 15 * * *"
+  pull_request:
+    paths:
+      - .github/workflows/sync-gql-schema.yaml
 
 permissions: {}
 
@@ -115,12 +118,16 @@ jobs:
             "$branch"
 
       - name: Push Branch
+        id: push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          title="Synchronize GitHub schema ($(date '+%Y-%m-%d'))"
+          echo "title=$title" >> "$GITHUB_OUTPUT"
+
           git add src/schema.graphql
-          git commit -m "Bump schema to latest
+          git commit -m "$title
 
           Fetched around $(date)"
           git checkout -b bump-schema
@@ -129,7 +136,8 @@ jobs:
       - name: Open PR
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_TITLE: ${{ steps.push.outputs.title }}
         run: |
           gh pr create \
-            --title "Synchronize GitHub schema ($(date '+%Y-%m-%d'))" \
-            --body "<!-- PR by sync-gql-schema.yaml -->"
+            --title "$PR_TITLE" \
+            --body '<!-- PR by sync-gql-schema.yaml -->'
