@@ -1,10 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import $monacoEditorPlugin from "vite-plugin-monaco-editor";
-import { createHash } from "crypto";
 import csp from "vite-plugin-csp-guard";
-import fs from "fs";
-import path from "path";
 
 const monacoEditorPlugin = $monacoEditorPlugin.default ?? $monacoEditorPlugin;
 const monacoWorkerJSFilePath = "monaco-graphql/esm/graphql.worker.js";
@@ -34,6 +31,7 @@ export default defineConfig({
         "style-src-elem": ["'unsafe-inline'"],
         "style-src-attr": ["'unsafe-inline'"],
         "font-src": ["'self'", "data:"],
+        "connect-src": ["'self'", "https://api.github.com/graphql"],
         "worker-src": [
           // TODO: remove 'self' - vite-plugin-monaco-editor is causing issues with CSP,
           //       we don't seem to be able to computes hash after build (it will lead to
