@@ -1,17 +1,30 @@
+import React from "react";
 import { createRoot } from "react-dom/client";
 import { GraphiQL } from "graphiql";
 import { buildSchema } from "graphql";
 import "graphiql/style.css";
 
 import schemaString from "./schema.graphql?raw";
+import defaultQuery from "./default-query.graphql?raw";
+
+const placeholderToken = "Bearer <TOKEN>";
+const defaultHeaders = `{
+  // Replace <TOKEN> with your token
+  // (https://github.com/settings/tokens).
+  "Authorization": "${placeholderToken}"
+}
+`;
 
 async function fetcher(graphQLParams, options) {
   // Warns if 'Authorization' header isn't set in order to reduce
   // the risk of user confusion as the GraphQL API doesn't accept
   // anonymous requests and may not always provide a helpful response
   // for the user.
-  const isAuthorizationHeaderSet = Object.keys(options.headers || {}).some(
-    (key) => key.toLowerCase() === "authorization",
+  const isAuthorizationHeaderSet = Object.entries(options.headers || {}).some(
+    ([key, value]) =>
+      key.toLowerCase() === "authorization" &&
+      typeof value === "string" &&
+      value !== placeholderToken,
   );
 
   if (!isAuthorizationHeaderSet) {
@@ -46,41 +59,12 @@ async function fetcher(graphQLParams, options) {
 }
 
 const root = createRoot(document.getElementById("graphiql"));
-const cachedSchemaUrl = new URL("./introspectionSchema.json", import.meta.url)
-  .href;
 
 root.render(
-  <GraphiQL
-    fetcher={fetcher}
-    schema={buildSchema(schemaString)}
-    defaultQuery={`
-# !!!! WARNING !!!
-# For it to work, you need to setup a GitHub Token and add it in the headers:
-# {
-#    "Authorization": "Bearer <TOKEN>"
-# }
-# 
-# But replace <TOKEN> with your token (https://github.com/settings/tokens).
-#
-# Remember: NEVER share the token with anyone, and grant as little permissions
-#           as possible.
-#
-{
-  organization(login: "ghost") {
-    repository(name: "my-ghost-repo") {
-      pullRequests(first: 10) {
-        nodes {
-          id
-          comments (first: 10) {
-            nodes {
-              author {login}
-              body
-            }
-          }
-        }
-      }
-    }
-  }
-}`}
-  />,
+  React.createElement(GraphiQL, {
+    fetcher,
+    schema: buildSchema(schemaString),
+    defaultQuery,
+    defaultHeaders,
+  }),
 );
