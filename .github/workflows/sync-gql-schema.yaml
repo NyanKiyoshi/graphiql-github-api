@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/sync-gql-schema.yaml
+  workflow_dispatch:
 
 permissions: {}
 
