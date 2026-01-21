@@ -1,9 +1,16 @@
 FROM node:24-slim AS pnpm
-RUN npm install -g 'pnpm@10' && pnpm -v
+
+WORKDIR /app
+
+# Install PNPM
+ADD ./package.json ./
+RUN set -eux; \
+  corepack enable; \
+  corepack install; \
+  pnpm -v
 
 FROM pnpm AS deps
-WORKDIR /app
-ADD ./package.json ./pnpm-lock.yaml ./
+ADD ./pnpm-lock.yaml ./pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 FROM pnpm AS vitebuild
