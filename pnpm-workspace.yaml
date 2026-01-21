@@ -1,0 +1,27 @@
+packages:
+  - bin/
+
+# Prevents the resolution of exotic protocols (git, direct downloads of tarballs, etc.)
+# only for transitive dependencies. Direct dependencies are allowed to use exotic sources.
+blockExoticSubdeps: true
+
+# Minimum number of minutes after a version is published before pnpm
+# allows to install it (direct and transitive).
+minimumReleaseAge: 20160 # in minutes - 2 weeks here
+minimumReleaseAgeExclude: [
+  # Fill me (if needed)
+]
+
+# Fail if the trust level of a package went down (e.g., package publishes
+# provenance information but the version PNPM is trying to install doesn't
+# have it = it will reject.)
+trustPolicy: no-downgrade
+
+# Custom versions
+overrides:
+  undici@>=7.0.0 <7.18.2: '>=7.18.2'
+
+# Keeps bin/ and the root directory separated as they are independent
+# from one to another.
+recursiveInstall: false
+sharedWorkspaceLockfile: false
