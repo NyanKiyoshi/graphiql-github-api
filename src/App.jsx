@@ -6,15 +6,13 @@ function App(props) {
   const monaco = useMonaco();
 
   React.useEffect(() => {
+    // The 'if' clause is needed as the monaco editor will be undefined
+    // initially until GraphiQL is done setting it up.
     if (monaco?.monaco?.editor) {
       const editorWrapper = monaco.monaco.editor;
 
+      // There are 4 editors: the GraphQL, variables, headers, and the JSON response view
       for (const editor of editorWrapper.getEditors()) {
-        console.log({
-          editor,
-          type: editor.getEditorType(),
-        });
-
         // HACK: from:
         //  - https://github.com/microsoft/monaco-editor/issues/2177#issuecomment-1409962193
         //  - https://github.com/microsoft/monaco-editor/discussions/3666
