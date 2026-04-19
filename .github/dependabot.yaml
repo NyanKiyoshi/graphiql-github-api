@@ -6,11 +6,17 @@ updates:
     schedule:
       interval: "monthly"
     cooldown:
-      default-days: 20
+      default-days: 21
+    groups:
+      actions:
+        patterns: ["*"]
 
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "monthly"
     cooldown:
-      default-days: 20
+      default-days: 21
+    groups:
+      npm:
+        patterns: ["*"]
