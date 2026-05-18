@@ -6438,6 +6438,41 @@ type ConnectedEvent implements Node {
 }
 
 """
+The content warning for a repository
+"""
+type ContentWarning {
+  """
+  The content warning' category. E.g. 'mis_dis_information'
+  """
+  category: String!
+
+  """
+  The content warning's custom sub category text. E.g. 'dangerous stuff.'
+  """
+  customSubCategory: String
+
+  """
+  The content warning's sub category. E.g. 'medical_scientific'
+  """
+  subCategory: String
+
+  """
+  The content warning's sub title. E.g. 'The information contained in this page has not been verified.'
+  """
+  subTitle: String
+
+  """
+  The content warning's title. E.g. 'This page may contain false or misleading information.'
+  """
+  title: String!
+
+  """
+  The type of content warning. E.g. 'interstitial'
+  """
+  type: String!
+}
+
+"""
 The Contributing Guidelines for a repository.
 """
 type ContributingGuidelines {
@@ -37128,6 +37163,16 @@ enum ProjectV2FieldType {
   ASSIGNEES
 
   """
+  Closed
+  """
+  CLOSED
+
+  """
+  Created
+  """
+  CREATED
+
+  """
   Date
   """
   DATE
@@ -37206,6 +37251,11 @@ enum ProjectV2FieldType {
   Tracks
   """
   TRACKS
+
+  """
+  Updated
+  """
+  UPDATED
 }
 
 """
@@ -49732,6 +49782,11 @@ type Repository implements Node & PackageOwner & ProjectOwner & ProjectV2Recent 
   Indicates whether the viewer can update the topics of this repository.
   """
   viewerCanUpdateTopics: Boolean!
+
+  """
+  The content warning for this repository for the viewer.
+  """
+  viewerContentWarning: ContentWarning
 
   """
   The last commit email for the viewer.
