@@ -4,6 +4,7 @@ import { GraphiQL } from "graphiql";
 import { buildSchema } from "graphql";
 import "graphiql/style.css";
 
+import App from "./App";
 import schemaString from "./schema.graphql?raw";
 import defaultQuery from "./default-query.graphql?raw";
 
@@ -61,7 +62,7 @@ async function fetcher(graphQLParams, options) {
 const root = createRoot(document.getElementById("graphiql"));
 
 root.render(
-  React.createElement(GraphiQL, {
+  React.createElement(App, {
     fetcher,
     schema: buildSchema(schemaString),
     defaultQuery,
