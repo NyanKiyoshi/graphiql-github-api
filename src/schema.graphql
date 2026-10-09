@@ -51222,6 +51222,11 @@ type Repository implements Node & PackageOwner & ProjectOwner & ProjectV2Recent 
   ): RepositoryConnection!
 
   """
+  Identifies the primary key from the database as a BigInt.
+  """
+  fullDatabaseId: BigInt
+
+  """
   The funding links for this repository
   """
   fundingLinks: [FundingLink!]!
