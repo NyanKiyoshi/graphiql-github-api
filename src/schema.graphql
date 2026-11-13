@@ -7852,6 +7852,8 @@ type CopilotCodeReviewSource {
 
   """
   The reported source name, or "custom instructions" for CUSTOM_INSTRUCTIONS.
+  Copilot Dreaming's reviewer agent and checks skill are reported as one SKILL
+  source named "Copilot dreaming".
   """
   name: String!
 
@@ -8686,7 +8688,7 @@ input CreateIssueFieldInput {
   options: [IssueFieldSingleSelectOptionInput!]
 
   """
-  The ID of the organization where the issue field will be created.
+  The ID of the organization or user where the issue field will be created.
   """
   ownerId: ID!
 
@@ -8861,7 +8863,7 @@ input CreateIssueTypeInput {
   description: String
 
   """
-  Whether or not the issue type is enabled on the org level
+  Whether or not the issue type is enabled
   """
   isEnabled: Boolean!
 
@@ -8871,7 +8873,7 @@ input CreateIssueTypeInput {
   name: String!
 
   """
-  The ID for the organization on which the issue type is created
+  The ID of the owner on which the issue type is created
   """
   ownerId: ID!
 }
@@ -12773,6 +12775,12 @@ input DisablePullRequestAutoMergeInput {
   clientMutationId: String
 
   """
+  Disable the stack auto-merge request covering this pull request. This disables
+  auto-merge for all pull requests covered by that request.
+  """
+  includeStack: Boolean = false
+
+  """
   ID of the pull request to disable auto merge on.
   """
   pullRequestId: ID!
@@ -14219,6 +14227,11 @@ input EnablePullRequestAutoMergeInput {
   The expected head OID of the pull request.
   """
   expectedHeadOid: GitObjectID
+
+  """
+  Enable auto-merge for this pull request and any eligible pull requests below it in the stack.
+  """
+  includeStack: Boolean = false
 
   """
   The merge method to use. If omitted, defaults to `MERGE`. NOTE: when merging
@@ -22625,14 +22638,19 @@ The visibility of an issue field.
 """
 enum IssueFieldVisibility {
   """
-  All
+  Visible to everyone who can see the issue.
   """
   ALL
 
   """
-  Org Only
+  Visible to members of the owning organization and, where repository context is supplied, collaborators on that repository.
   """
-  ORG_ONLY
+  ORG_ONLY @deprecated(reason: "`ORG_ONLY` will be removed. Use `RESTRICTED` instead. Removal on 2027-04-01 UTC.")
+
+  """
+  Visible to the owner and to collaborators on the repository the field is read through.
+  """
+  RESTRICTED
 }
 
 """
@@ -36016,7 +36034,7 @@ enum OrganizationMigrationState {
 }
 
 """
-Used for argument of CreateProjectV2 mutation.
+An organization or user that can own resources.
 """
 union OrganizationOrUser = Organization | User
 
@@ -39458,12 +39476,12 @@ type ProjectV2Field implements Node & ProjectV2FieldCommon {
   id: ID!
 
   """
-  Returns true if this field is associated with an organization issue field
+  Returns true if this field is associated with an issue field
   """
   isIssueField: Boolean!
 
   """
-  The organization issue field associated with this project field, if any
+  The issue field associated with this project field, if any
   """
   issueField: IssueFields
 
@@ -39508,7 +39526,7 @@ interface ProjectV2FieldCommon {
   id: ID!
 
   """
-  Returns true if this field is associated with an organization issue field
+  Returns true if this field is associated with an issue field
   """
   isIssueField: Boolean!
 
@@ -40728,7 +40746,7 @@ type ProjectV2IterationField implements Node & ProjectV2FieldCommon {
   id: ID!
 
   """
-  Returns true if this field is associated with an organization issue field
+  Returns true if this field is associated with an issue field
   """
   isIssueField: Boolean!
 
@@ -40848,12 +40866,12 @@ type ProjectV2MultiSelectField implements Node & ProjectV2FieldCommon {
   id: ID!
 
   """
-  Returns true if this field is associated with an organization issue field
+  Returns true if this field is associated with an issue field
   """
   isIssueField: Boolean!
 
   """
-  The organization issue field associated with this project field, if any
+  The issue field associated with this project field, if any
   """
   issueField: IssueFields
 
@@ -41144,12 +41162,12 @@ type ProjectV2SingleSelectField implements Node & ProjectV2FieldCommon {
   id: ID!
 
   """
-  Returns true if this field is associated with an organization issue field
+  Returns true if this field is associated with an issue field
   """
   isIssueField: Boolean!
 
   """
-  The organization issue field associated with this project field, if any
+  The issue field associated with this project field, if any
   """
   issueField: IssueFields
 
@@ -42385,7 +42403,12 @@ type PullRequest implements Assignable & Closable & Comment & Labelable & Lockab
   """
   Returns the auto-merge request object if one exists for this pull request.
   """
-  autoMergeRequest: AutoMergeRequest
+  autoMergeRequest(
+    """
+    Return the stack auto-merge request covering this pull request.
+    """
+    includeStack: Boolean = false
+  ): AutoMergeRequest
 
   """
   Identifies the base Ref associated with the pull request.
@@ -43353,7 +43376,12 @@ type PullRequest implements Assignable & Closable & Comment & Labelable & Lockab
   """
   Whether or not the viewer can disable auto-merge
   """
-  viewerCanDisableAutoMerge: Boolean!
+  viewerCanDisableAutoMerge(
+    """
+    Check permission to disable the stack auto-merge request covering this pull request.
+    """
+    includeStack: Boolean = false
+  ): Boolean!
 
   """
   Can the viewer edit files within this pull request.
@@ -43363,7 +43391,13 @@ type PullRequest implements Assignable & Closable & Comment & Labelable & Lockab
   """
   Whether or not the viewer can enable auto-merge
   """
-  viewerCanEnableAutoMerge: Boolean!
+  viewerCanEnableAutoMerge(
+    """
+    Check permission to request stacked auto-merge from this pull request. The
+    client evaluates stack-wide blockers and readiness.
+    """
+    includeStack: Boolean = false
+  ): Boolean!
 
   """
   Indicates if the viewer can edit labels for this object.
@@ -51913,7 +51947,7 @@ type Repository implements Node & PackageOwner & ProjectOwner & ProjectV2Recent 
   issueCreationPolicy: IssueCreationPolicy
 
   """
-  A list of the repository's issue fields, inherited from the organization
+  A list of the repository's issue fields, inherited from the repository's owner
   """
   issueFields(
     """
@@ -52381,6 +52415,36 @@ type Repository implements Node & PackageOwner & ProjectOwner & ProjectV2Recent 
     """
     orderBy: PinnedEnvironmentOrder = {field: POSITION, direction: ASC}
   ): PinnedEnvironmentConnection
+
+  """
+  An ordered list of the repository owner's issue fields pinned to issues when no type is selected.
+  """
+  pinnedIssueFields(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    The order in which to return pinned issue fields.
+    """
+    orderBy: PinnedIssueFieldOrder = {field: POSITION, direction: ASC}
+  ): IssueFieldsConnection
 
   """
   A list of pinned issues for this repository.
@@ -66908,7 +66972,7 @@ input UpdateIssueTypeInput {
   description: String
 
   """
-  Whether or not the issue type is enabled for the organization
+  Whether or not the issue type is enabled
   """
   isEnabled: Boolean
 
@@ -69133,6 +69197,66 @@ type User implements Actor & Agentic & Node & PackageOwner & ProfileOwner & Proj
   ): IssueCommentConnection!
 
   """
+  A list of the user's issue fields
+  """
+  issueFields(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Ordering options for issue fields returned from the connection.
+    """
+    orderBy: IssueFieldOrder = {field: CREATED_AT, direction: ASC}
+  ): IssueFieldsConnection
+
+  """
+  A list of the user's issue types
+  """
+  issueTypes(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Ordering options for issue types returned from the connection.
+    """
+    orderBy: IssueTypeOrder = {field: CREATED_AT, direction: ASC}
+  ): IssueTypeConnection
+
+  """
   A list of issues associated with this user.
   """
   issues(
@@ -69383,6 +69507,36 @@ type User implements Actor & Agentic & Node & PackageOwner & ProfileOwner & Proj
     """
     types: [PinnableItemType!]
   ): PinnableItemConnection!
+
+  """
+  An ordered list of issue fields pinned to issues when no type is selected.
+  """
+  pinnedIssueFields(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    The order in which to return pinned issue fields.
+    """
+    orderBy: PinnedIssueFieldOrder = {field: POSITION, direction: ASC}
+  ): IssueFieldsConnection
 
   """
   A list of repositories and gists this profile owner has pinned to their profile
