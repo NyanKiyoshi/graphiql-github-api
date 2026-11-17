@@ -53693,6 +53693,11 @@ type RepositoryCopilotCodeReviewSettings {
   availableReviewEfforts: [CopilotCodeReviewEffortLevel!]!
 
   """
+  Whether reviews can use public repository search.
+  """
+  crossRepoContextEnabled: Boolean!
+
+  """
   Whether reviews use the repository's custom instructions.
   """
   customInstructionsEnabled: Boolean!
@@ -68388,6 +68393,12 @@ input UpdateRepositoryCopilotCodeReviewSettingsInput {
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
+
+  """
+  Whether reviews can use public repository search. Can only be set when the
+  public repository search setting is available for the repository.
+  """
+  crossRepoContextEnabled: Boolean
 
   """
   Whether reviews use the repository's custom instructions.
